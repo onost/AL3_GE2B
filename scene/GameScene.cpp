@@ -46,12 +46,21 @@ void GameScene::Initialize() {
 	// カメラ視点座標を設定
 	//viewProjection_.eye = {0.0f, 0.0f, -10.0f};
 	// カメラ注視点座標を設定
-	viewProjection_.target = {10.0f, 0.0f, 0.0f};
+	//viewProjection_.target = {10.0f, 0.0f, 0.0f};
+	// カメラ垂直方向視野角を設定
+	//viewProjection_.fovAngleY = XMConvertToRadians(10.0f);
+	// アスペクト比を設定
+	//viewProjection_.aspectRatio = 1.0f;
+	//	ニアクリップ距離を設定
+	viewProjection_.nearZ = 52.0f;
+	// ファークリップ距離を設定
+	viewProjection_.farZ = 53.0f;
 	// ビュープロジェクションの初期化
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
+	/*
 	// 視点移動処理
 	{
 		// 視点の移動ベクトル
@@ -106,6 +115,43 @@ void GameScene::Update() {
 		debugText_->Printf(
 		  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
 		  viewProjection_.target.z);
+	}
+	*/
+	// FoV変更処理
+	{
+		// 上キーで視野角が広がる
+		if (input_->PushKey(DIK_UP)) {
+			viewProjection_.fovAngleY += 0.01f;
+			viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
+		}
+		// 下キーで視野角が狭まる
+		else if (input_->PushKey(DIK_DOWN)) {
+			viewProjection_.fovAngleY -= 0.01f;
+			viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
+		}
+
+		// 行列の再計算
+		viewProjection_.UpdateMatrix();
+
+		// デバッグ表示
+		debugText_->SetPos(50, 110);
+		debugText_->Printf("fovAngleY(Degree):%f", XMConvertToDegrees(viewProjection_.fovAngleY));
+	}
+	// クリップ距離変更処理
+	{
+		// 上下キーでニアクリップ距離を増減
+		if (input_->PushKey(DIK_W)) {
+			viewProjection_.nearZ += 0.1f;
+		} else if (input_->PushKey(DIK_S)) {
+			viewProjection_.nearZ -= 0.1f;
+		}
+
+		// 行列の再計算
+		viewProjection_.UpdateMatrix();
+
+		// デバッグ表示
+		debugText_->SetPos(50, 130);
+		debugText_->Printf("nearZ:%f", viewProjection_.nearZ);
 	}
 }
 
